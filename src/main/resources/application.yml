@@ -1,0 +1,61 @@
+server:
+  port: 8088
+
+security:
+  basic:
+    enabled: false
+
+management:
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org:
+      springframework:
+        security:
+          oauth2:
+            client: TRACE
+            oauth2: TRACE
+          web:
+            client:
+              RestTemplate: TRACE
+            reactive:
+              function:
+                client: TRACE
+          boot:
+            autoconfigure: DEBUG
+        springframework: TRACE
+
+tenants:
+  configs:
+    - tenant: <tenantId>
+      registrationId: <okta registrationId>
+      domain: <okta domain>
+      clientId: <okta clientId>
+      clientSecret: <okta clientSecret>
+
+spring:
+  application:
+    name: edge-auth-gateway
+  redis:
+    host: localhost
+    port: 6379
+  session:
+    store-type: redis
+    timeout: 1800
+  cloud:
+    gateway:
+      routes:
+        - id: stream-sailor-service
+          uri: http://localhost:8084/event-streamify/
+          predicates:
+            - Path=/stream-sailor/**
+        - id: test-service
+          uri: http://localhost:8080/test/
+          predicates:
+            - Path=/test/**
+          filters:
+            - AddRequestHeader=ngrok-skip-browser-warning,1
+
